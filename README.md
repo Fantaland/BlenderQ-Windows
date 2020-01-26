@@ -7,7 +7,7 @@ Brender Que is a project that allows you to que Blender files to render.
 This first edition is quite simple.  You can put your file path in the input box, and click "add job".  if you add multiple jobs, it will wait until one is finished to start the next.  It will make sure all files get rendered in the que.  Note that you mustt be using Python3 to run the script.
 
 
-#PLANNED UPDATES
+###### PLANNED UPDATES #####
 
 --Version 1.0.0 "The One" Update --
 
