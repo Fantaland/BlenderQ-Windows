@@ -22,6 +22,10 @@ This update's goal is to flesh out the program and make it more user friendly.
 + Program detects new render jobs faster
 + Options menu
 + Ability to change filepath of Blender
+
+
+--Later Features--
+
 + Progress bar on current render
 + Auto-detection of Blender file path
 + Email alerts when files are finished
