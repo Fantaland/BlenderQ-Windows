@@ -1,5 +1,5 @@
 # BrenderQue
-BrenderQue is a project that allows you to que Blender files to render.
+BrenderQue is a program that allows you to que Blender files to render.
 
 
 ## Update and Changelog ##
