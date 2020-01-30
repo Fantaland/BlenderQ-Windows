@@ -7,12 +7,15 @@ BrenderQue is a tool that allows you to que Blender Renders for render on a mach
 
 
 
-### Basic Usage ###
+## Basic Usage ##
+
+### Launching BrenderQue ###
 Launch BrenderQue from the command line using "python3 BrenderQue/main.py".
 
 *Note that you must supply the full path to main.py.  For example, if BrenderQue is in your downloads folder, and your username was karl, the command would be "python3 C:/Users/karl/Downloads/BrenderQue/main.py"
 
 
+### Your First Que ###
 After BrenderQue launches, you can then use it right away.  To add a render job, simply input the full file path to the file you want to render, specify if it is an animation or not, and click add job.  Blender will open up in command line mode and begin rendering.
 
 
