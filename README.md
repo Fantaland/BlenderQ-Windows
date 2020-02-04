@@ -4,8 +4,11 @@ BrenderQue is a program that allows you to que Blender files to render.
 
 ## Update and Changelog ##
 --Version 0.5--
+
 2/4/2020
+
 [Changelog]
+
 New Things:
  + Options panel
  + Support for all Blender versions and file locations
@@ -28,9 +31,9 @@ Changes:
 This update's goal is to flesh out the program and make it more user friendly.
 
 [Plan log]
-+ Executable versions for Windows and Linux
-+ Progress bar on current render
-+ Auto-detection of Blender file path
-+ "First time" setup dialog
-+ Even better interface
-+ Email alerts when files are finished
+ + Executable versions for Windows and Linux
+ + Progress bar on current render
+ + Auto-detection of Blender file path
+ + "First time" setup dialog
+ + Even better interface
+ + Email alerts when files are finished
