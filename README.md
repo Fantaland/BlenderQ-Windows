@@ -7,7 +7,7 @@ BrenderQue is a program that allows you to que Blender files to render.
 
 2/4/2020
 
-###[Changelog]###
+###Changelog###
 
 New Things:
  + Options panel
@@ -30,7 +30,7 @@ Changes:
 
 This update's goal is to flesh out the program and make it more user friendly.
 
-###[Plan log]###
+###Plan log###
  + Executable versions for Windows and Linux
  + Progress bar on current render
  + Extra security hardening
