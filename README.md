@@ -33,6 +33,7 @@ This update's goal is to flesh out the program and make it more user friendly.
 [Plan log]
  + Executable versions for Windows and Linux
  + Progress bar on current render
+ + Extra security hardening
  + Auto-detection of Blender file path
  + "First time" setup dialog
  + Even better interface
