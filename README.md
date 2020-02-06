@@ -38,3 +38,5 @@ This update's goal is to flesh out the program and make it more user friendly.
  + "First time" setup dialog
  + Even better interface
  + Email alerts when files are finished
+ + Drag and drop files
+ + Command line interface
