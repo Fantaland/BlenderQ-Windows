@@ -1,0 +1,1 @@
+call "C:/Program Files/Blender Foundation/Blender 2.81/blender" -b "C:/bqtest/officescene1.blend" -f 11> D:\Documents\BrenderQue\brq-win\current-output.txt &

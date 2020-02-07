@@ -3,30 +3,40 @@ BrenderQue is a program that allows you to que Blender files to render.
 
 
 ## Update and Changelog ##
---Version 0.1a--
+--Version 0.5--
 
-This first edition is quite simple.  You can put your file path in the input box, and click "add job".  if you add multiple jobs, it will wait until one is finished to start the next.  It will make sure all files get rendered in the que.  Check out the user manual if you need help using BrenderQue
+2/4/2020
+
+[Changelog]
+
+New Things:
+ + Options panel
+ + Support for all Blender versions and file locations
+ + Browse button/file picker
+ 
+Changes:
+ + Rewrote core components
+ + Improved interface
+ + Program actually ques now
+ + Patched potential security vulnerabilities
+ + Program detects new render jobs faster
+ + Improved performance
+ + Adding a job will clear the file input box
 
 
-###### PLANNED UPDATES #####
+## PLANNED UPDATES ##
 
 --Version 1.0.0 "The One" Update --
 
 This update's goal is to flesh out the program and make it more user friendly.
 
-[Changelog]
-+ Executable versions for Windows and Linux
-+ Browse button/file picker
-+ Adding a job will clear the file input box
-+ Small interface improvements
-+ Improved performance
-+ Program detects new render jobs faster
-+ Options menu
-+ Ability to change filepath of Blender
-
-
---Later Features--
-
-+ Progress bar on current render
-+ Auto-detection of Blender file path
-+ Email alerts when files are finished
+[Plan log]
+ + Executable versions for Windows and Linux
+ + Progress bar on current render
+ + Extra security hardening
+ + Auto-detection of Blender file path
+ + "First time" setup dialog
+ + Even better interface
+ + Email alerts when files are finished
+ + Drag and drop files
+ + Command line interface
