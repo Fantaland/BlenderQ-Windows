@@ -31,5 +31,5 @@ After BrenderQue launches, you can then use it right away.  To add a render job,
 
 ***
 
-### Visit the Wiki! ###
-For updated and more in-depth documentation, visit the BrenderQue wiki here: https://github.com/Fantaland/BrenderQue/wiki
+## Visit the Wiki! ##
+For updated and more in-depth documentation, visit the BrenderQue wiki here: https://github.com/Fantaland/BrenderQue/wiki.  BrenderQue does not currently update automatically, so it's a good idea to periodically check for updates. 
