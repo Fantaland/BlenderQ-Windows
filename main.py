@@ -1,6 +1,5 @@
-# BrenderQue Win-0.5
-# Written by Ethan Montgomery on 1/23/2020 (0.1a)
-# 0.5 Completed by Ethan Montgomery on 2/4/2020
+# BrenderQue Win-1.0.0
+# 0.5.1 Completed by Ethan Montgomery on 2/4/2020
 
 from tkinter import * # for interface.
 from tkinter import filedialog # for the file browser.
@@ -9,9 +8,9 @@ from tkinter import font # for fonts.
 import subprocess # to run the batch process kicking off the actual rendering.
 import threading # enough said.
 import pathlib # to get the path of the python file and for blender file path handling.
-import psutil # for checking process id
+import ctypes # check UAC priveledge
 
-programpath = str(pathlib.WindowsPath(__file__).parent.absolute()) # path of BrenderQue
+programpath = str(pathlib.WindowsPath(__file__).parent.absolute()) # path of Blender Q
 blenderfilepath = 'C:/Program Files/Blender Foundation/Blender 2.81/'
 renderjobs = []
 settingsfile = 'settings'
@@ -20,71 +19,92 @@ executefile = 'ex.bat'
 
 currentjob = subprocess.Popen('cd', shell=True)
 currentjob.wait()
-curpid = 99999
+
+notallowedcharacters=[';','?','*','<','>','|','"','&']
 
 isfirstrender = True
 
 # Load in the variables from settings.
 def Load():
     global blenderfilepath
-    # # look inside settings file for settings.
+    # look inside settings file for settings.
     sf = open(programpath + '\\' + settingsfile, 'r')
     for line in sf:
         if 'BPL' in line:
             bfp = line.split('=', maxsplit=1)
-            # blenderfilepath = str(pathlib.Path(bfp[1]))
             blenderfilepath = str(bfp[1].rstrip())
-            print('Path loaded for Blender: ' + blenderfilepath)
+            print('NOTE: Current path loaded for Blender: ' + blenderfilepath)
 
             if pathlib.Path(blenderfilepath).is_dir():
-                print('Blender File Path is real.')
+                print('GOOD: Blender file path is real.')
             else:
-                print('Path is invalid!')
+                print('BAD: Blender file path is invalid!')
         else:
-            print('Using default config...')
+            print('NOTE: Settings not found, using default config...')
             return
 
     sf.close()
-    print('Settings loaded')
+    print('GOOD: Settings loaded')
+
+def IsAdmin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
 
 # this is the button handler function for create job.  it also calls JobManager, getting rid of the delay between adding the first job and rendering.
 def AddJob():
     CreateJob(newFilePath.get(), isanim.get()) # Call create job.
-    newFilePath.delete(0, END) # clear the entry box.
     JobManager() # call JobManager.
 
 # CreateJob actually assembles the job and puts it in the que.
 # p is the path, a is if it is an animation or not.
 def CreateJob(p, a):
-    s = 'call "' + str(blenderfilepath) + 'blender" -b "' + p + '"'
-    if a == True:
-        s += ' -a'
+    safecheck = 0 # The saftey index
+    safecharacters = False
+
+    if p.find(':') == 1:
+        safecheck += 1
+    if p.find('\\') == 2 or p.find('/') == 2:
+        safecheck += 1
+
+    if any(x in notallowedcharacters for x in p):
+        print("BAD: Invalid character(s) inputted.")
+        safecharacters = False
     else:
-        s += ' -f 1'
+        print("GOOD: Characters are clean.")
+        safecharacters = True
 
-    s += ('1> ' + programpath + '\\' + blenderoutputfile + ' &')
+    if safecheck == 2 and safecharacters == True:
+        s = 'call "' + str(blenderfilepath) + 'blender" -b "' + p + '"'
+        if a == True:
+            s += ' -a'
+        else:
+            s += ' -f 1'
 
-    renderjobs.append(s) # put the job in the que.
-    inQue.insert(len(renderjobs), p) # show the path in the que list.
+        s += ('1> ' + programpath + '\\' + blenderoutputfile + ' &')
 
-    print('Job created for file: ' + s)
+        renderjobs.append(s) # put the job in the que.
+        inQue.insert(len(renderjobs), p) # show the path in the que list.
+
+        newFilePath.delete(0, END) # clear the entry box.
+
+        print('GOOD: Job created for file: ' + s)
+    else:
+        print('BAD: Security issue detected.  Check inputted filepath and try again!')
 
 # Run next job executes the command to run the next job.
 def RunNextJob():
     global currentjob
 
-    print('Running next job...')
+    print('GOOD: Running next job...')
 
     ef = open(programpath + '\\' + executefile, 'w')
-    # ef.write('cd ' + str(blenderfilepath))
     ef.write(renderjobs[0])
     ef.close()
-    # currentjob = subprocess.Popen(renderjobs[0], cwd=str(blenderfilepath), shell=True, bufsize=1, universal_newlines=True, stdout=subprocess.PIPE) # Old method with security threat and doesn't work for "queing"
     currentjob = subprocess.Popen(programpath + '\\' + executefile, cwd=str(blenderfilepath))
-    global curpid
-    curpid = currentjob.pid
-    print('PID: ' + str(curpid))
+
     nf = inQue.get(0,0)
     inQue.delete(0)
     finished.insert(0, nf)
@@ -102,30 +122,59 @@ def JobManager():
     lastline = linesop[-1].rstrip()
 
     if lastline == 'Blender quit':
-        print('Ready to render next file.')
+        print('NOTE: Ready to render next file...')
         isrendering = False
     else:
         isrendering = True
 
     if len(renderjobs) > 0:
         if isrendering and isfirstrender == False:
-            print('Still Rendering')
+            print('NOTE: Still rendering current job...')
         else:
             RunNextJob()
             renderjobs.pop(0)
             isfirstrender = False
 
-    # print('isrendering =' + str(isrendering))
-    # print(lastline)
-    # print(linesop[-1])
 
+# def OpenAdminWarning():
+#     global adminwarning
+#     closetxt = StringVar()
+#
+#     adminwarning = Toplevel(wind)
+#     adminwarning.geometry('400x400')
+#     adminwarning.title('Admin Warning!')
+#     adminwarning.resizable(False, False)
+#     adminwarning['bg'] = '#f2f2f2'
+#
+#     closelabel = Label(adminwarning, textvariable=closetxt)
+#     closetxt.set('Warning!  You are running Blender Q as an admin.  This does not inheriently pose a security risk, but consider running this application as a non-admin for stronger security.')
+#     closelabel.place(x=80, y=35)
+#
+#     continbtn = Button(adminwarning, text='Continue', command=CloseAdminWarning)
+#     continbtn.place(height=35, width=100, x=150, y=325)
+#     continbtn['borderwidth'] = 0
+#     continbtn['bg'] = '#88789e'
+#     continbtn['fg'] = '#2c2930'
+#
+#     adminwarning.mainloop()
+#
+#     print('NOTE: Admin warning opened.')
+#
+# #Close admin warning
+# def CloseAdminWarning():
+#     adminwarning.destroy()
 
 # Kicks off important JobManager function and Load function.
 def Init():
-    # subprocess.call('cd C:/Program Files/Blender Foundation/Blender 2.81/', shell=True)
     Load()
     threading.Timer(5, JobManager).start()
-    print('Init finished.')
+    print('GOOD: Init finished.')
+
+    if IsAdmin() == True:
+        print('WARNING: You are running Blender Q as an admin.  This does not inheriently pose a security risk, but consider running this application as a non-admin for stronger security.')
+        # OpenAdminWarning() #Open the admin warning box.
+    else:
+        print('GOOD: Process not run as administrator.')
 
 # Opens and draws the options menu
 def OpenOpt():
@@ -136,8 +185,7 @@ def OpenOpt():
 
     optionsmenu = Toplevel(wind)
     optionsmenu.geometry('400x400')
-    optionsmenu.title('BrenderQue Options')
-    # optionsmenu.call('wm', 'iconphoto', optionsmenu._w, PhotoImage(file=programpath + '\\resources\\brenderQueLogo.png'))
+    optionsmenu.title('Blender Q Options')
     optionsmenu.resizable(False, False)
     optionsmenu['bg'] = '#f2f2f2'
 
@@ -164,7 +212,7 @@ def OpenOpt():
 
     optionsmenu.mainloop()
 
-    print('Options opened.')
+    print('NOTE: Options opened.')
 
 # Saves options.
 def SaveOpt():
@@ -173,7 +221,7 @@ def SaveOpt():
     sf.write('BPL=' + blenderfilepathbox.get())
     sf.close()
     optionsmenu.destroy()
-    print('Options saved.')
+    print('NOTE: Options saved.')
 
 previousdir = '' #previousdir needs to remain outside of the OpenFileDialog function so the filepath can persist.
 # OpenFileDialog opens a file browser and sets the new file path entry to the path of whatever file is selected.
@@ -192,10 +240,9 @@ Init()
 #Interface creation
 wind = Tk()
 wind.geometry('800x600')
-wind.title('BrenderQue')
+wind.title('Blender Q')
 wind.call('wm', 'iconphoto', wind._w, PhotoImage(file=programpath + '\\resources\\brenderQueLogo.png'))
 wind.resizable(False, False)
-# wind['bg'] = '#2c2930'
 wind['bg'] = '#88789e'
 
 smallfont = font.Font(size=9)
@@ -209,7 +256,7 @@ finishedtxt = StringVar()
 isanim = BooleanVar()
 
 versionL = Label(wind, textvariable=versiontxt)
-versiontxt.set('Version 0.5')
+versiontxt.set('Version 1.0')
 versionL.pack(side='bottom', pady=5)
 versionL['bg'] = '#88789e'
 versionL['fg'] = '#2c2930'
@@ -226,7 +273,6 @@ browsebtn.place(height=25, width=80, x=470, y=120)
 browsebtn['borderwidth'] = 0
 browsebtn['bg'] = '#2c2930'
 browsebtn['fg'] = '#f2f2f2'
-# browsebtn['font'] = mainfont
 
 addbtn = Button(text="Add Job", command=AddJob)
 addbtn.place(height=35, width=100, x=350, y=170)
