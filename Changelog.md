@@ -31,6 +31,7 @@ Changes:
  + Interface improvements
  + Progress bar on current render
  + Improved console output
+ + Minor bug fixes
 
 [Future Plan log]
  + Linux/Unix support
