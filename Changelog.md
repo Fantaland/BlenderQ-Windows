@@ -30,6 +30,7 @@ Changes:
  + Extra security hardening
  + Interface improvements
  + Progress bar on current render
+ + Improved console output
 
 [Future Plan log]
  + Linux/Unix support
