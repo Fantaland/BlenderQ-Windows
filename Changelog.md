@@ -28,13 +28,14 @@ Changes:
 
 1.0 Update
  + Extra security hardening
- + Drag and drop files
- + Email alerts when files are finished
+ + Interface improvements
+ + Progress bar on current render
 
 [Future Plan log]
  + Linux/Unix support
- + Progress bar on current render
  + Auto-detection of Blender file path
  + "First time" setup dialog
  + Even better interface
  + Command line interface
+ + Drag and drop files
+ + Email alerts when files are finished
