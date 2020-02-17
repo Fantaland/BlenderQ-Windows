@@ -8,7 +8,7 @@ The latest version will always get the newest security updates.  Since there is 
 
 Simple fix chart.  For more information on security bugs, email the contact below.
 
-| Version |  Basic Security flaws fixed |  Additonal Hardening     |
+| Version |  Basic Security |  Additonal Hardening     |
 | ------- | ------------------ | ------------- |
 | 1.0.x dev | :white_check_mark: | :white_check_mark:
 | 0.5.x   | :white_check_mark: | :x:
