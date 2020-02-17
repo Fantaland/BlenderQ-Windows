@@ -33,11 +33,13 @@ Changes:
  + Improved console output
  + Minor bug fixes
 
-[Future Plan log]
+1.1 Update
+ + Command line interface
  + Linux/Unix support
+
+[Future features]
  + Auto-detection of Blender file path
  + "First time" setup dialog
  + Even better interface
- + Command line interface
  + Drag and drop files
  + Email alerts when files are finished
