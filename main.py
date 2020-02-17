@@ -4,29 +4,35 @@
 from tkinter import * # for interface.
 from tkinter import filedialog # for the file browser.
 from tkinter import font # for fonts.
-#import smtplib # for email alerts.
+from tkinter.ttk import Progressbar # more interface.
 import subprocess # to run the batch process kicking off the actual rendering.
-import threading # enough said.
+import threading # enough said!
 import pathlib # to get the path of the python file and for blender file path handling.
-import ctypes # check UAC priveledge
+import ctypes # check UAC priveledge.
+# import re # for cleaning up some strings.  This is mostly interface based, but might have security uses in the future.
+import sys
 
+# basic functionality.
 programpath = str(pathlib.WindowsPath(__file__).parent.absolute()) # path of Blender Q
 blenderfilepath = 'C:/Program Files/Blender Foundation/Blender 2.81/'
 renderjobs = []
 settingsfile = 'settings'
 blenderoutputfile = 'current-output.txt'
 executefile = 'ex.bat'
+isfirstrender = True
 
 currentjob = subprocess.Popen('cd', shell=True)
 currentjob.wait()
 
-notallowedcharacters=[';','?','*','<','>','|','"','&']
+# security related.
+notallowedcharacters=[';','?','*','<','>','|','"','&','*','$']
 
-isfirstrender = True
 
 # Load in the variables from settings.
 def Load():
-    global blenderfilepath
+    global blenderfilepath # the blender filepath
+    global keyloaded # loaded security key
+    global f # for fernet
     # look inside settings file for settings.
     sf = open(programpath + '\\' + settingsfile, 'r')
     for line in sf:
@@ -46,12 +52,23 @@ def Load():
     sf.close()
     print('GOOD: Settings loaded')
 
+# Checks if user is admin and returns true or false.  If this function fails, it returns false.
 def IsAdmin():
     try:
         return ctypes.windll.shell32.IsUserAnAdmin()
     except:
         return False
 
+# Utility to get the filename out of the inputted path reguardless of / or \ notation.  Also removes .blend when returned.  Intended for interface use only.
+def ExtractFilename(full):
+    if full.find('\\') != -1:
+        fullsplit = full.split('\\')
+    elif full.find("/"):
+        fullsplit = full.split('/')
+
+    end = fullsplit[len(fullsplit) - 1]
+    name = end.split('.')
+    return name[0]
 
 # this is the button handler function for create job.  it also calls JobManager, getting rid of the delay between adding the first job and rendering.
 def AddJob():
@@ -68,6 +85,8 @@ def CreateJob(p, a):
         safecheck += 1
     if p.find('\\') == 2 or p.find('/') == 2:
         safecheck += 1
+    if p.endswith('.blend'):
+        safecheck += 1
 
     if any(x in notallowedcharacters for x in p):
         print("BAD: Invalid character(s) inputted.")
@@ -76,21 +95,21 @@ def CreateJob(p, a):
         print("GOOD: Characters are clean.")
         safecharacters = True
 
-    if safecheck == 2 and safecharacters == True:
+    if safecheck == 3 and safecharacters == True:
         s = 'call "' + str(blenderfilepath) + 'blender" -b "' + p + '"'
         if a == True:
             s += ' -a'
         else:
-            s += ' -f 1'
+            s += ' -f 1 '
 
         s += ('1> ' + programpath + '\\' + blenderoutputfile + ' &')
 
         renderjobs.append(s) # put the job in the que.
-        inQue.insert(len(renderjobs), p) # show the path in the que list.
+        inQue.insert(len(renderjobs), ExtractFilename(p)) # show the path in the que list.  Use extract filename to clean it up.
 
         newFilePath.delete(0, END) # clear the entry box.
 
-        print('GOOD: Job created for file: ' + s)
+        print('GOOD: Job created for file: ' + p)
     else:
         print('BAD: Security issue detected.  Check inputted filepath and try again!')
 
@@ -105,16 +124,14 @@ def RunNextJob():
     ef.close()
     currentjob = subprocess.Popen(programpath + '\\' + executefile, cwd=str(blenderfilepath))
 
-    nf = inQue.get(0,0)
-    inQue.delete(0)
-    finished.insert(0, nf)
+    UpdateInterface() # Update the interface.
 
 
 # Job manager determines if it is time for the next scene to be rendered.
 def JobManager():
     global isfirstrender
 
-    threading.Timer(5, JobManager).start()
+    t = threading.Timer(5, JobManager).start()
     isrendering = False
     op = open(programpath + '\\' + blenderoutputfile)
     linesop = op.readlines()
@@ -123,6 +140,7 @@ def JobManager():
 
     if lastline == 'Blender quit':
         print('NOTE: Ready to render next file...')
+        # UpdateInterface() #This updates it so that when the last render is done it shows it as done.
         isrendering = False
     else:
         isrendering = True
@@ -135,6 +153,17 @@ def JobManager():
             renderjobs.pop(0)
             isfirstrender = False
 
+# Updating the interface for when a file is completed rendering, added to the que, or finished rendering.  This function is unaware of actual progress, so calling placement is important.
+def UpdateInterface():
+    nf = inQue.get(0,0)
+    inQue.delete(0)
+    # This for loop cleans up the string when it gets outputted to the finished list.
+    cft = currentfiletxt.get()
+    for char in '\(\)\,\'':
+        cft = cft.replace(char, '')
+
+    finished.insert(0, cft)
+    currentfiletxt.set(nf)
 
 # def OpenAdminWarning():
 #     global adminwarning
@@ -167,8 +196,10 @@ def JobManager():
 # Kicks off important JobManager function and Load function.
 def Init():
     Load()
-    threading.Timer(5, JobManager).start()
-    print('GOOD: Init finished.')
+    global t
+    t = threading.Timer(5, JobManager).start()
+
+    print('GOOD: Init running.')
 
     if IsAdmin() == True:
         print('WARNING: You are running Blender Q as an admin.  This does not inheriently pose a security risk, but consider running this application as a non-admin for stronger security.')
@@ -234,6 +265,12 @@ def OpenFileDialog():
     newFilePath.insert(0, n)
     previousdir = str(pathlib.Path(newFilePath).parent.absolute()) # This causes an error but seems to work fine.
 
+def OnClose():
+    print('NOTE: Shutting Down Program... Goodbye!')
+    # t.cancel()
+    wind.destroy()
+    sys.exit()
+
 Init()
 
 ###########INTERFACE############
@@ -254,6 +291,8 @@ versiontxt = StringVar()
 inQuetxt = StringVar()
 finishedtxt = StringVar()
 isanim = BooleanVar()
+currentprogressbartxt = StringVar()
+currentfiletxt = StringVar()
 
 versionL = Label(wind, textvariable=versiontxt)
 versiontxt.set('Version 1.0')
@@ -307,6 +346,22 @@ inQue['borderwidth'] = 0
 inQue['highlightthickness'] = 0
 inQue['bg'] = '#f2f2f2'
 
+# currentprogressbar = Progressbar(wind, orient = HORIZONTAL, length = 150, mode = 'determinate', value=35)
+# currentprogressbar.place(x=325, y=280)
+
+currentprogressbarL = Label(wind, textvariable=currentprogressbartxt)
+currentprogressbartxt.set('Currently Rendering:')
+currentprogressbarL.place(width=150, x=325, y=245)
+currentprogressbarL['bg'] = '#88789e'
+currentprogressbarL['fg'] = '#f2f2f2'
+
+currentfileL = Label(wind, textvariable=currentfiletxt)
+currentfiletxt.set('')
+currentfileL.place(width=150, x=325, y=275)
+currentfileL['bg'] = '#88789e'
+currentfileL['fg'] = '#f2f2f2'
+
+
 finishedL = Label(wind, textvariable=finishedtxt)
 finishedtxt.set('Finished')
 finishedL.place(width=100, x=475, y=210)
@@ -319,4 +374,5 @@ finished['borderwidth'] = 0
 finished['highlightthickness'] = 0
 finished['bg'] = '#f2f2f2'
 
+wind.protocol("WM_DELETE_WINDOW", OnClose)
 wind.mainloop()
